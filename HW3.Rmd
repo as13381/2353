@@ -156,16 +156,16 @@ predict(mod_1, data.frame(a_1 = 1, b_1 = 0), interval = 'prediction', level = 0.
 
 
 ### (e)
-\[ CI = \hat{A} \pm t_{\frac{\alpha}{2}, n-p} \hat{\sigma} \sqrt{1 + x_{new}^T (X^T X)^{-1}x_{new}} \]
+\[ CI = \hat{A} + \hat{B} \pm t_{\frac{\alpha}{2}, n-p} \hat{\sigma} \sqrt{1 + x_{new}^T (X^T X)^{-1}x_{new}} \]
 \[ \alpha = 0.1, n = 6, p = 2 \] 
-\[ x_{new} = \begin{pmatrix} 1 \\ 0 \end{pmatrix} \]
+\[ x_{new} = \begin{pmatrix} 1 \\ 1 \end{pmatrix} \]
 \[ x_{new}^T (X^T X)^{-1}x_{new}  =
-\begin{pmatrix} 1 & 0 \end{pmatrix}
+\begin{pmatrix} 1 & 1 \end{pmatrix}
 \begin{pmatrix} \frac{1}{3} & -\frac{1}{6} \\ -\frac{1}{6} & \frac{1}{3} \end{pmatrix}
-\begin{pmatrix} 1 \\ 0 \end{pmatrix}
+\begin{pmatrix} 1 \\ 1 \end{pmatrix}
 = \frac{1}{3} \]
-\[ \hat{A} = \frac{7}{3}, t_{\frac{0.1}{2}, 6-2} = t_{0.05, 4} = 2.132, \hat{\sigma} = \sqrt{\frac{5}{12}} \]
-\[ CI = \frac{7}{3} \pm 2.132 \sqrt{\frac{5}{12}} \sqrt{1 + \frac{1}{3}} = [0.744, 3.922] \]
+\[ \hat{A} = \frac{7}{3}, \hat{B} = \frac{11}{6}, t_{\frac{0.1}{2}, 6-2} = t_{0.05, 4} = 2.132, \hat{\sigma} = \sqrt{\frac{5}{12}} \]
+\[ CI = \frac{7}{3} + \frac{11}{6} \pm 2.132 \sqrt{\frac{5}{12}} \sqrt{1 + \frac{1}{3}} = [2.578, 5.756] \]
 
 ### (f)
 ```{r}
@@ -186,5 +186,166 @@ predict(mod_2, data.frame(a_2 = 1, b_2 = 1), interval = 'confidence', level = 0.
 predict(mod_2, data.frame(a_2 = 1, b_2 = -1), interval = 'confidence', level = 0.9)
 ```
 ```{r}
-predict(mod_2, data.frame(a_2 = 1, b_2 = 0), interval = 'prediction', level = 0.9)
+predict(mod_2, data.frame(a_2 = 1, b_2 = 1), interval = 'prediction', level = 0.9)
 ```
+
+
+## Problem 3
+
+
+### (a)
+\[ CI = \hat{A} \pm t_{\frac{\alpha}{2}, n-p} \hat{\sigma} \sqrt{d_1} \]
+\[ \alpha = 0.05, n = 7, p = 2 \] 
+  \[ x_{new} = \begin{pmatrix} 1 \\ 0 \end{pmatrix} \]
+  \[ d_1 = x_{new}^T (X^T X)^{-1}x_{new}  =
+  \begin{pmatrix} 1 & 0 \end{pmatrix}
+  \begin{pmatrix} \frac{5}{16} & -\frac{3}{16} \\ -\frac{3}{16} & \frac{5}{16} \end{pmatrix}
+  \begin{pmatrix} 1 \\ 0 \end{pmatrix}
+  = \frac{5}{16} \]
+\[ \hat{A} = \frac{39}{16}, t_{\frac{0.05}{2}, 7-2} = t_{0.025, 5} = 2.571, \hat{\sigma} = \sqrt{\frac{7}{16}} \]
+\[ CI = \frac{39}{16} \pm 2.571 \sqrt{\frac{7}{16}} \sqrt{\frac{5}{16}} = [1.487, 3.388] \]
+
+
+### (b)
+\[ CI = \hat{B} \pm t_{\frac{\alpha}{2}, n-p} \hat{\sigma} \sqrt{d_1} \]
+\[ \alpha = 0.05, n = 7, p = 2 \] 
+\[ x_{new} = \begin{pmatrix} 0 \\ 1 \end{pmatrix} \]
+\[ d_1 = x_{new}^T (X^T X)^{-1}x_{new}  =
+\begin{pmatrix} 0 & 1 \end{pmatrix}
+\begin{pmatrix} \frac{5}{16} & -\frac{3}{16} \\ -\frac{3}{16} & \frac{5}{16} \end{pmatrix}
+\begin{pmatrix} 0 \\ 1 \end{pmatrix}
+= \frac{5}{16} \]
+\[ \hat{B} = \frac{31}{16}, t_{\frac{0.05}{2}, 7-2} = t_{0.025, 5} = 2.571, \hat{\sigma} = \sqrt{\frac{7}{16}} \]
+\[ CI = \frac{31}{16} \pm 2.571 \sqrt{\frac{7}{16}} \sqrt{\frac{5}{16}} = [0.987, 2.888] \]
+
+
+### (c)
+\[ CI = \hat{A} + \hat{B} \pm t_{\frac{\alpha}{2}, n-p} \hat{\sigma} \sqrt{d_1} \]
+\[ \alpha = 0.05, n = 7, p = 2 \] 
+\[ x_{new} = \begin{pmatrix} 1 \\ 1 \end{pmatrix} \]
+\[ d_1 = x_{new}^T (X^T X)^{-1}x_{new}  =
+\begin{pmatrix} 1 & 1 \end{pmatrix}
+\begin{pmatrix} \frac{5}{16} & -\frac{3}{16} \\ -\frac{3}{16} & \frac{5}{16} \end{pmatrix}
+\begin{pmatrix} 1 \\ 1 \end{pmatrix}
+= \frac{1}{4} \]
+\[ \hat{A} = \frac{39}{16}, \hat{B} = \frac{31}{16}, t_{\frac{0.05}{2}, 7-2} = t_{0.025, 5} = 2.571, \hat{\sigma} = \sqrt{\frac{7}{16}} \]
+\[ CI = \frac{39}{16} + \frac{31}{16} \pm 2.571 \sqrt{\frac{7}{16}} \sqrt{\frac{1}{4}} = [3.525, 5.225] \]
+
+
+### (d)
+\[ CI = \hat{A} - 2 \hat{B} \pm t_{\frac{\alpha}{2}, n-p} \hat{\sigma} \sqrt{d_1} \]
+\[ \alpha = 0.05, n = 7, p = 2 \] 
+\[ x_{new} = \begin{pmatrix} 1 \\ -2 \end{pmatrix} \]
+\[ d_1 = x_{new}^T (X^T X)^{-1}x_{new}  =
+\begin{pmatrix} 1 & -2 \end{pmatrix}
+\begin{pmatrix} \frac{5}{16} & -\frac{3}{16} \\ -\frac{3}{16} & \frac{5}{16} \end{pmatrix}
+\begin{pmatrix} 1 \\ -2 \end{pmatrix}
+= \frac{37}{16} \]
+\[ \hat{A} = \frac{39}{16}, \hat{B} = \frac{31}{16}, t_{\frac{0.05}{2}, 7-2} = t_{0.025, 5} = 2.571, \hat{\sigma} = \sqrt{\frac{7}{16}} \]
+\[ CI = \frac{39}{16} - 2 \cdot \frac{31}{16} \pm 2.571 \sqrt{\frac{7}{16}} \sqrt{\frac{37}{16}} = [-4.023, 1.148] \]
+
+
+### (e)
+\[ CI = \hat{B} \pm t_{\frac{\alpha}{2}, n-p} \hat{\sigma} \sqrt{1 + x_{new}^T (X^T X)^{-1}x_{new}} \]
+\[ \alpha = 0.05, n = 7, p = 2 \] 
+\[ x_{new} = \begin{pmatrix} 0 \\ 1 \end{pmatrix} \]
+\[ x_{new}^T (X^T X)^{-1}x_{new}  =
+\begin{pmatrix} 0 & 1 \end{pmatrix}
+\begin{pmatrix} \frac{5}{16} & -\frac{3}{16} \\ -\frac{3}{16} & \frac{5}{16} \end{pmatrix}
+\begin{pmatrix} 0 \\ 1 \end{pmatrix}
+= \frac{5}{16} \]
+\[ \hat{B} = \frac{31}{16}, t_{\frac{0.05}{2}, 7-2} = t_{0.025, 5} = 2.571, \hat{\sigma} = \sqrt{\frac{7}{16}} \]
+\[ CI = \frac{31}{16} \pm 2.571 \sqrt{\frac{7}{16}} \sqrt{1 + \frac{5}{16}} = [-0.010, 3.885] \]
+
+### (f)
+```{r}
+y_3 <- c(2, 1, 4, 2, 2, 5, 5)
+a_3 <- c(1, 0, 1, 1, 0, 1, 1)
+b_3 <- c(0, 1, 1, 0, 1, 1, 1)
+
+mod_3 <- lm(y_3 ~ a_3 + b_3 -1)
+predict(mod_3, data.frame(a_3 = 1, b_3 = 0), interval = 'confidence', level = 0.95)
+```
+```{r}
+predict(mod_3, data.frame(a_3 = 0, b_3 = 1), interval = 'confidence', level = 0.95)
+```
+```{r}
+predict(mod_3, data.frame(a_3 = 1, b_3 = 1), interval = 'confidence', level = 0.95)
+```
+```{r}
+predict(mod_3, data.frame(a_3 = 1, b_3 = -2), interval = 'confidence', level = 0.95)
+```
+```{r}
+predict(mod_3, data.frame(a_3 = 0, b_3 = 1), interval = 'prediction', level = 0.95)
+```
+
+
+## Problem 4
+
+
+### (a)
+\[ CI = \hat{A} \pm t_{\frac{\alpha}{2}, n-p} \hat{\sigma} \sqrt{d_1} \]
+\[ \alpha = 0.3, n = 3, p = 2 \] 
+  \[ x_{new} = \begin{pmatrix} 1 \\ 0 \end{pmatrix} \]
+  \[ d_1 = x_{new}^T (X^T X)^{-1}x_{new}  =
+  \begin{pmatrix} 1 & 0 \end{pmatrix}
+  \begin{pmatrix} \frac{2}{3} & -\frac{1}{3} \\ -\frac{1}{3} & \frac{2}{3} \end{pmatrix}
+  \begin{pmatrix} 1 \\ 0 \end{pmatrix}
+  = \frac{2}{3} \]
+\[ \hat{A} = \frac{7}{3}, t_{\frac{0.3}{2}, 3-2} = t_{0.15, 1} = 1.963, \hat{\sigma} = \sqrt{\frac{1}{3}} \]
+\[ CI = \frac{7}{3} \pm 1.963 \sqrt{\frac{1}{3}} \sqrt{\frac{2}{3}} = [1.408, 3.259] \]
+
+
+### (b)
+\[ CI = \hat{B} \pm t_{\frac{\alpha}{2}, n-p} \hat{\sigma} \sqrt{d_1} \]
+\[ \alpha = 0.3, n = 3, p = 2 \] 
+\[ x_{new} = \begin{pmatrix} 0 \\ 1 \end{pmatrix} \]
+\[ d_1 = x_{new}^T (X^T X)^{-1}x_{new}  =
+\begin{pmatrix} 0 & 1 \end{pmatrix}
+\begin{pmatrix} \frac{2}{3} & -\frac{1}{3} \\ -\frac{1}{3} & \frac{2}{3} \end{pmatrix}
+\begin{pmatrix} 0 \\ 1 \end{pmatrix}
+= \frac{2}{3} \]
+\[ \hat{B} = \frac{11}{6}, t_{\frac{0.3}{2}, 3-2} = t_{0.15, 1} = 1.963, \hat{\sigma} = \sqrt{\frac{1}{3}} \]
+\[ CI = \frac{11}{6} \pm 1.963 \sqrt{\frac{1}{3}} \sqrt{\frac{2}{3}} = [0.908, 2.759] \]
+
+
+### (c)
+\[ CI = \hat{A} + \hat{B} \pm t_{\frac{\alpha}{2}, n-p} \hat{\sigma} \sqrt{d_1} \]
+\[ \alpha = 0.3, n = 3, p = 2 \] 
+\[ x_{new} = \begin{pmatrix} 1 \\ 1 \end{pmatrix} \]
+\[ d_1 = x_{new}^T (X^T X)^{-1}x_{new}  =
+\begin{pmatrix} 1 & 1 \end{pmatrix}
+\begin{pmatrix} \frac{2}{3} & -\frac{1}{3} \\ -\frac{1}{3} & \frac{2}{3} \end{pmatrix}
+\begin{pmatrix} 1 \\ 1 \end{pmatrix}
+= \frac{2}{3} \]
+\[ \hat{A} = \frac{7}{3}, \hat{B} = \frac{11}{6}, t_{\frac{0.3}{2}, 3-2} = t_{0.15, 1} = 1.963, \hat{\sigma} = \sqrt{\frac{1}{3}} \]
+\[ CI = \frac{7}{3} + \frac{11}{6} \pm 1.963 \sqrt{\frac{1}{3}} \sqrt{\frac{2}{3}} = [3.241, 5.092] \]
+
+
+### (d)
+\[ CI = \hat{A} - \hat{B} \pm t_{\frac{\alpha}{2}, n-p} \hat{\sigma} \sqrt{d_1} \]
+\[ \alpha = 0.3, n = 3, p = 2 \] 
+\[ x_{new} = \begin{pmatrix} 1 \\ -1 \end{pmatrix} \]
+\[ d_1 = x_{new}^T (X^T X)^{-1}x_{new}  =
+\begin{pmatrix} 1 & -1 \end{pmatrix}
+\begin{pmatrix} \frac{2}{3} & -\frac{1}{3} \\ -\frac{1}{3} & \frac{2}{3} \end{pmatrix}
+\begin{pmatrix} 1 \\ -1 \end{pmatrix}
+= 2 \]
+\[ \hat{A} = \frac{7}{3}, \hat{B} = \frac{11}{6}, t_{\frac{0.3}{2}, 3-2} = t_{0.15, 1} = 1.963, \hat{\sigma} = \sqrt{\frac{1}{3}} \]
+\[ CI = \frac{7}{3} - \frac{11}{6} \pm 1.963 \sqrt{\frac{1}{3}} \sqrt{2} = [-1.102, 2.102] \]
+
+
+### (e)
+\[ CI = \hat{A} + \hat{B} \pm t_{\frac{\alpha}{2}, n-p} \hat{\sigma} \sqrt{1 + x_{new}^T (X^T X)^{-1}x_{new}} \]
+\[ \alpha = 0.3, n = 3, p = 2 \] 
+\[ x_{new} = \begin{pmatrix} 1 \\ 1 \end{pmatrix} \]
+\[ x_{new}^T (X^T X)^{-1}x_{new}  =
+\begin{pmatrix} 1 & 1 \end{pmatrix}
+\begin{pmatrix} \frac{2}{3} & -\frac{1}{3} \\ -\frac{1}{3} & \frac{2}{3} \end{pmatrix}
+\begin{pmatrix} 1 \\ 1 \end{pmatrix}
+= \frac{2}{3} \]
+\[ \hat{A} = \frac{7}{3}, \hat{B} = \frac{11}{6}, t_{\frac{0.3}{2}, 3-2} = t_{0.15, 1} = 1.963, \hat{\sigma} = \sqrt{\frac{1}{3}} \]
+\[ CI = \frac{7}{3} + \frac{11}{6} \pm 1.963 \sqrt{\frac{1}{3}} \sqrt{1 + \frac{2}{3}} = [2.704, 5.630] \]
+
+### (f)
+With more measurements the confidence intervals are smaller. With less balls being measured the confidence interval is also smaller. In general, the confidence intervals are quite large so more measurements are needed for precise point estimations using this method.
