@@ -1,0 +1,39 @@
+---
+title: "HW4"
+author: "Andrew Shao"
+date: "2024-10-21"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## (a)
+In the `fat` dataset there are 252 observations and 18 variables.
+
+## Appendix
+### (a)
+```{r, echo=FALSE}
+### Read the data 
+library(faraway)
+head(fat); 
+
+### Another alternative way to load the data
+# if you save this file "fat.csv" in your laptop, say, 
+#   in the folder "C://temp", you can read it in R as
+# fat <- read.table(file = "C://temp/fat.csv", sep=",", header=TRUE);
+
+## (a) Exploratory Data Analysis 
+dim(fat)
+summary(fat)
+## histogram 
+hist(fat$brozek)
+
+## plot
+library(lattice)
+splom(fat)
+## correlation matrix 
+round(cor(fat),2)
+## Any pairs with absolute value of "cor" >= 0.90? 
+```
