@@ -3,6 +3,10 @@ title: "HW4"
 author: "Andrew Shao"
 date: "2024-10-21"
 output: pdf_document
+header-includes: 
+  - \usepackage{tikz}
+  - \usepackage{fvextra}
+  - \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
 ---
 
 ```{r setup, include=FALSE}
@@ -10,9 +14,63 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## (a)
-In the `fat` dataset there are 252 observations and 18 variables.
+In the `fat` dataset there are 252 observations and 18 variables, with each observation corresponding to the measurements for a singular man. The response variable in this analysis is `brozek`, a measure of body fat using Brozek's equation. There are 17 other potential predictor variables. `siri` is a measure of body fat using Siri's equation. `density`, `age`, `weight`, and `height` are what their names suggest. `adipos` is the adiposity index while `free` is the fat free weight using Brozek's formula. The remaining variables `neck`, `chest`, `abdom`, `hip`, `thigh`, `knee`, `ankle`, `biceps`, `forearm`, and `wrist`, are the circumference measurements for the named body part. All 18 of these variables are numeric. `brozek` appears to be normally distributed. The pairs of variables with a correlation coefficient of at least 0.9 are `brozek` and `siri`, `hip` and `weight`, `chest` and `adipos`, `abdom` and `adipos`, `chest` and `abdom`, and `hip` and `thigh`. Fat percentage shows strong correlations with several measurements.
+
+### (b)
+The fitted model is as follows:
+$$
+\begin{aligned}
+brozek = & 12.152 + 0.888 \cdot siri - 9.846 \cdot density - 0.001 \cdot age + 0.008 \cdot weight - 0.001 \cdot height - 0.015 \cdot adipos \\
+&- 0.010 \cdot free + 0.001 \cdot neck + 0.002 \cdot chest + 0.001 \cdot abdom - 0.004 \cdot hip + 0.016 \cdot thigh \\
+&- 0.025 \cdot knee + 0.003 \cdot ankle - 0.015 \cdot biceps + 0.015 \cdot forearm + 0.033 \cdot wrist
+\end{aligned}
+$$
+Residual standard error is 0.1706 with 234 degrees of freedom.
+Multiple R-squared and adjusted R-squared are both 0.9995.
+The F-statistic p-value is extremely small, less than $2.2 \cdot 10^{-16}$.
+The variables that are significant at the 0.05 level are `siri`, `density`, `weight`, `free`, `thigh`, `knee`, and `biceps`.
+This model is questionable because it includes many variables which are already highly correlated, like `siri` and `density` where `density` is directly used to calculate siri` but it does seem to have good predictive power as it has very high R-squared values and an extremely small F-statistic p-value. There are many non-significant variables which could be removed to possibly simplify the model.
+
+### (c)
+The fitted model is as follows:
+$$
+\begin{aligned}
+brozek = &-10.546 + 0.005 \cdot age + 0.335 \cdot weight + 0.047 \cdot height - 0.0447 \cdot adipos - 0.5523 \cdot free \\
+&+ 0.020 \cdot neck + 0.111 \cdot chest + 0.130 \cdot abdom - 0.004 \cdot hip + 0.183 \cdot thigh + 0.082 \cdot knee \\
+&+ 0.127 \cdot ankle + 0.099 \cdot biceps + 0.216 \cdot forearm + 0.139 \cdot wrist
+\end{aligned}
+$$
+Residual standard error is 1.384 with 236 degrees of freedom.
+Multiple R-squared is 0.97  and adjusted R-squared is 0.9681.
+The F-statistic p-value is extremely small still, less than $2.2 \cdot 10^{-16}$.
+The variables that are significant at the 0.05 level are `weight`, `adipos`, `free`, `chest`, `abdom`, `thigh`, and `forearm`.
+This model still has very high predictive power with higher R-squared values but also much higher residual standard error, suggesting decreased precision. Additionally there are still many non-significant variables which could be removed to possibly simplify the model.
+
+### (d)
+The fitted model is as follows:
+$$
+\begin{aligned}
+brozek = &-6.397 + 0.346 \cdot weight - 0.530 \cdot adipos - 0.522 \cdot free + 0.113 \cdot chest + 0.179 \cdot thigh + 0.137 \cdot ankle \\
+&+ 0.103 \cdot biceps + 0.220 \cdot forearm  + 0.225 \cdot wrist
+\end{aligned}
+$$
+Residual standard error is 1.378 with 241 degrees of freedom.
+Multiple R-squared is 0.9363  and adjusted R-squared is 0.9684.
+The F-statistic p-value is extremely small still, less than $2.2 \cdot 10^{-16}$.
+The variables that are significant at the 0.05 level are `weight`, `adipos`, `free`, `chest`, `abdom`, `thigh`, `ankle`, and `forearm`.
+This model is much simpler with almost all of the variables significant while maintaining predictive power with quite large R-squared values.
+
+### (e)
+Model #3 has slightly lower multiple R-squared  but slightly higher adjusted R-squared. I prefer model #3 because it is much simpler as it has less predictors while maintaining comparable R-squared values. Additionally, the ANOVA F-test p value is very high which suggests not much difference between the two models.
+
+### (f)
+The training error for model #2 is 1.740 and the training error for model #3 is 1.786. The testing error for model #2 is 0.0096 and 0.0037 for model #3.
+
+### (g)
+The mean training error for model 2 is 1.6757 which is less than the error for model 3 which is 1.7701. The mean testing error for model 2 is 0.2593 which is higher than the mean testing error for model 3 which is 0.0531. The p-value from the tests are both significant, indicating the difference in performance is significant. I prefer model #3 like with part (e) because it is both simpler but performs better in terms of testing error indicating better generalization/less overfitting.
 
 ## Appendix
+
 ### (a)
 ```{r, echo=FALSE}
 ### Read the data 
@@ -36,4 +94,131 @@ splom(fat)
 ## correlation matrix 
 round(cor(fat),2)
 ## Any pairs with absolute value of "cor" >= 0.90? 
+```
+
+### (b)
+```{r, echo=FALSE}
+## (b) Model #1:  Fit a full linear regression model
+fit1 <- lm(brozek ~ ., data = fat);
+fit1; 
+summary(fit1)
+```
+
+### (c)
+```{r, echo=FALSE}
+## (c) Model #2: fit linear regression model with $15$ predictors:
+fit2 <- lm(brozek ~ .-siri-density, data = fat);
+fit2;
+summary(fit2)
+```
+
+### (d)
+```{r, echo=FALSE}
+## (d) Model #3: fit linear regression model with $10$ predictors:
+## the simplest code would be
+##         fit3 <- step(fit2);
+## Here we spell out all 10 predictors
+fit3 <- lm(brozek ~ weight+ adipos+ free+ chest+ abdom+ thigh+ 
+             ankle+ biceps+ forearm+ wrist, data = fat);
+fit3;
+summary(fit3)
+```
+
+### (e)
+```{r, echo=FALSE}
+### (e) model comparison
+c(summary(fit2)$r.squared, summary(fit3)$r.squared) 
+c(summary(fit2)$adj.r.squared, summary(fit3)$adj.r.squared) 
+anova(fit2, fit3)
+### When p-value of ANOVA > 5%, we accept the smaller model
+### when p-value of ANOVA <= 5%, we accept the larger model
+###   as its improvement over smaller model is significant
+```
+
+### (f)
+```{r, echo=FALSE}
+## (f) Training Error and Testing Error
+n = dim(fat)[1];      ### total number of observations
+n1 = round(0.80*n);  ### 80% of observations randomly selected for training sample
+n2 = n - n1;         ### sample size for testing sample
+set.seed(2353);   ### you can change this initial seed for randomization
+flag = sort(sample(1:n, n1));
+fat1train = fat[flag,]; ###  80% data as the training subset
+fat1test  = fat[-flag,]; ### remaining 20% data as the testing subset
+
+## (f)(1) use the training subset to fit 2 regression models
+##  note the difference on the data set as compared to (c) and (d)
+fit2f <- lm(brozek ~ .-siri-density, data = fat1train );
+fit3f <- lm(brozek ~ weight+ adipos+ free+ chest+ abdom+ thigh+ 
+             ankle+ biceps+ forearm+ wrist, data = fat1train);
+## training errors of these two models 
+TrainErr0 <- c(mean(fit2f$residuals^2), mean(fit3f$residuals^2));
+TrainErr0
+## in general, the training errors of bigger model should be smaller!
+
+## (f)(2) Testing errors on the testing subset "fat1test"
+##  To avoid confusions, the "newdata" does not include the true Y values
+Pred2f <- predict(fit2f, newdata= fat1test[,2:18] ); 
+Pred3f <- predict(fit3f, newdata= fat1test[,2:18] ); 
+TestErr0 <- c(mean(Pred2f - fat1test[,1])^2, mean(Pred3f - fat1test[,1])^2 );
+TestErr0
+## Often a bigger model does not necessarily has a smaller testing error!!!
+## Indeed, models with larger adj.Rsquared would often have smaller testing error!  
+```
+
+### (g)
+```{r, echo=FALSE}
+### (g) cross validation on the performance robustness of these two models 
+set.seed(2353);
+B = 100;
+TrainErr = NULL;  ## record all training errors 
+TestErr  = NULL;  ##record all testing errors 
+for (b in 1:B){
+  ## with each loop, create training and testing subsets
+  flagtmp = sort(sample(1:n, n1));
+  fat1traintmp = fat[flagtmp,];   ###"temporal" training subset
+  fat1testtmp = fat[-flagtmp, ];  ###"temporal" testing subset
+  
+  ###### Fit these two (2) models to the "temporal" training subset
+  fit2ftmp <- lm(brozek ~ .-siri-density, data = fat1traintmp );
+  fit3ftmp <- lm(brozek ~ weight+ adipos+ free+ chest+ abdom+ thigh+ 
+                ankle+ biceps+ forearm+ wrist, data = fat1traintmp);
+  
+  ## Save training errors of these two models for the "temporal" training subset
+  TrainErr <- rbind(TrainErr, c(mean(fit2ftmp$residuals^2), mean(fit3ftmp$residuals^2)));
+  
+  ###### Prediction of these two (2) models to the "temporal" testing subset
+  Pred2ftmp <- predict(fit2ftmp, newdata= fat1testtmp[,2:18] ); 
+  Pred3ftmp <- predict(fit3ftmp, newdata= fat1testtmp[,2:18] ); 
+  TestErr <- rbind(TestErr, c(mean(Pred2ftmp - fat1testtmp[,1])^2, mean(Pred3ftmp - fat1testtmp[,1])^2 ));
+}
+
+### Training Error Comaprison of two models 
+colnames(TrainErr) <- c("Mod2", "Mod3")
+dim(TrainErr);
+round(apply(TrainErr, 2, mean),4);
+round(apply(TrainErr, 2, var),4);
+
+### Testing  Error Comparisons of two models 
+colnames(TestErr) <- c("Mod2", "Mod3")
+dim(TestErr);
+round(apply(TestErr, 2, mean),4);
+round(apply(TestErr, 2, var),4);
+
+## Statistical difference testing to compare two models 
+##  We can adopt the paired two-sample test 
+##   since the same training/test subsets are used for fitting two models 
+## (a) First, use two-sample t-test for training and testing errors
+t.test(TrainErr[,1],TrainErr[,2],paired=T)
+t.test(TestErr[,1],TestErr[,2],paired=T)
+## which model has smaller training error? which has smaller testing error?
+## Hints: you can check the values 
+round(apply(TrainErr, 2, mean),4);
+round(apply(TestErr, 2, mean),4);
+
+## (b) Second, use nonparametric Wilcox test for training and testing errors
+wilcox.test(TrainErr[,1],TrainErr[,2],paired=T)
+wilcox.test(TestErr[,1],TestErr[,2],paired=T)
+## which model has smaller training error? which has smaller testing error?
+## You can use similar ideas from t.test in (a)
 ```
