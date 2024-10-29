@@ -3,6 +3,16 @@ library(faraway)
 head(teengamb); 
 
 ## (a) Please modify the R codes in HW#4 for  Exploratory data analysis
+dim(happy)
+summary(happy)
+## histogram 
+hist(happy$happy)
+
+## plot
+library(lattice)
+splom(happy)
+## correlation matrix 
+round(cor(happy),2)
 
 ### (b) Jack's model
 Jackmod <- lm(happy ~ money + sex + love + work, data = happy)
