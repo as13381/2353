@@ -1,0 +1,279 @@
+---
+title: "HW5"
+author: "Andrew Shao"
+date: "2024-10-27"
+output: pdf_document
+header-includes: 
+  - \usepackage{tikz}
+  - \usepackage{fvextra}
+  - \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### (a)
+In the `happy` dataset there are 39 observations and 5 variables, with each observation corresponding to the measurements for a single University of Chicago MBA student. The response variable in this analysis is `happy`, a subjective measurement of happiness on a 10 point scale with 10 being the happiest. `money` measures the students' family incomes in thousands of dollars, `sex` is a binary indicator variable describing whether participants were satisfied with their sexual activity, and `love` is a categorical variable where 1 indicates the student is lonely, 2 indicates the student has secure relationships and 3 indicates a deep feeling of belonging and caring. `work` is a 5 point scale where 1 is no job and 5 is a great job. `happy` does not appear to be normally distributed and looks skewed to the left. No two variables have a correlation value greater than 0.9.
+
+### (b)
+The fitted model is:
+\[happy=-0.072+0.0096\cdot money-0.149\cdot sex+1.919\cdot love+0.476\cdot work\]
+The residual standard error is 1.058 on 34 df. \
+The multiple R-squared is 0.7102 and the adjusted R-squared is 0.6761. \
+The F-statistic p-value is $9.364 \cdot 10^{-9}$. \
+The two variables significant at the 0.05 level are `love` and `work`. \
+
+The model has rather high R-squared values with a very small F-statistic p-value which indicates it explains most of the variance in happiness and the model is statistically significant and thus useful to predict happiness using the input variables. Additionally, the Q-Q plot residuals seem to generally follow the line which suggests that the residuals are indeed normally distributed. However, there seems to be a slight curve in the fitted vs residuals plot which suggests a possible non-linear relationship. Also, the scale-location plot suggests that variance isn't constant. The residuals vs leverage plot also suggests that point 36 could be an outlier but it seems to be on the border of being influential.
+
+### (c)
+The plot of the square root of the absolute residuals versus the fitted values shows a non-constant spread, with some potential increase in variability as fitted values increase.
+The Breusch-Pagan test yielded a p-value of 0.03069, which is below the 5% significance level, suggesting that the homoscedasticity assumption is violated. This indicates heteroscedasticity, meaning the model's residual variance is not constant. \
+The Q-Q plot of residuals generally follows the line, indicating approximate normality.
+The histogram of residuals shows a roughly symmetric bell shape, supporting this assumption.
+The Shapiro-Wilk normality test has a p-value of 0.8749, which is well above 0.05, indicating no significant deviation from normality. \
+The leverage points identified (indices 2, 6, 7, and 10) have high leverage, which means these observations have the potential to unduly influence the model’s predictions. \
+The largest absolute studentized residual is -3.276 for observation 36 and no studentized residuals exceed the Bonferroni critical value of 3.510854, suggesting no observations are significant outliers at the 5% significance level. \
+No observations exceed the threshold for Cook’s distance, suggesting no highly influential points. 
+
+### (d)
+To address the nonconstant variance issue I would suggest doing weighted least squares approach. The other assumptions/diagnostics are fine so I don't think anything else is necessary. The final model from 20 rounds of WLS is:
+\[ happy=0.3135+0.0058\cdot money-0.1328\cdot sex+1.8671\cdot love+0.4698\cdot work \]
+
+### (e)
+Kathy's final model was as follows:
+\begin{align*}
+happy = & -33.52 + 0.228 \cdot money + 25.74 \cdot sex + 17.23 \cdot love + 5.71 \cdot work \\
+& - 0.140 \cdot (money \times sex) - 0.110 \cdot (money \times love) + 0.009 \cdot (money \times work) \\
+& - 11.69 \cdot (sex \times love) - 4.97 \cdot (sex \times work) - 2.41 \cdot (love \times work) \\
+& + 0.069 \cdot (money \times sex \times love) + 2.07 \cdot (sex \times love \times work)
+\end{align*}
+The residual standard error is 0.8535 on 26 df. \
+The multiple R-squared is 0.8559 and the adjusted R-squared is 0.7894. \
+The F-statistic p-value is $4.832 \cdot 10^{-8}$. \
+The variables significant at the 0.05 level are `money`, `sex`, `love`, `work`, and the interaction terms between; `money` and `love`, `sex` and `love`, `sex` and `work`, `love` and `work`, and `sex`, `love`, and `work. \
+This model seems to be better at predicting happiness than Jack's  model as it has higher R-squared values with a very significant F-statistic p-value and also has a lot more significant variables. However, with this many variables the model could be too complex and overfitting as a result. Validation on testing data is necessary.
+
+### (f)
+The plot of square root of absolute residuals versus fitted values shows a fairly random scatter, suggesting no strong evidence of heteroscedasticity. The Breusch-Pagan test returned a p-value of 0.551, which is well above 0.05, indicating no significant evidence of heteroscedasticity. \
+The Q-Q plot of residuals follows the 45-degree line fairly closely, suggesting approximate normality, with minor deviations at the tails. 
+The histogram of residuals shows a roughly symmetric shape, supporting this assumption.
+The Shapiro-Wilk test has a p-value of 0.3524 and the Durbin-Watson test gives a p-value of 0.3092, indicating not enough evidence to suggest the residuals aren't normally distributed. \
+Observations with high leverage were identified (indices 1, 15, 19, and 36), indicating these observations have potential to influence the model substantially. \
+The largest absolute studentized residual is 2.77 for observation 11 and no studentized residuals exceed the Bonferroni critical value of 3.510854, meaning no observations are identified as significant outliers. \
+Observation 36 is an influential point, so it should be carefully considered as it may significantly impact model estimates. \
+
+
+### (g)
+The F-statistic p-value is 0.01005 which is significant and suggests that Kathy's model provides a significantly better fit to the data than Jack’s model, as it captures additional variance through its interaction terms. \
+Kathy’s model has a significantly lower training error mean and variance compared to Jack’s model, suggesting it fits the training data much better. This makes sense, since Kathy’s model is more complex and should capture more interactions among predictors. Jack’s model has a lower testing error compared to Kathy’s model, both in terms of mean and variance. This suggests that Kathy’s model is overfitting the data, resulting in poor performance on new data and shows inability to generalize. \
+The t-test for training error yields a highly significant p-value, indicating that the difference in training errors between Jack’s and Kathy’s models is statistically significant. 
+The t-test for testing errors results in a p-value of 0.05492, which is close to 0.05 but not significant, suggesting that the difference in testing errors is not statistically significant. 
+The Wilcoxon test for training errors gives an extremely small p-value, suggesting a significant difference in training error between the models.
+The Wilcoxon test yields a p-value of 0.1696, indicating no statistically significant difference in testing error between the models. \
+Overall I would prefer Jack's model as it seems to perform better when generalizing to new data. However, it moreso depends on the purpose of the model and whether it needs to be capable of generalization. I would suggest to experiment with (e.g. cross-validation or LASSO) adding more terms/complexity to the model to see if there is a better middle point between the complexity of the two models to optimize testing performance and complexity.
+
+### (h)
+My advice would be to focus on relationships (`love`) and finding a fulfilling job (`work`) in that order, since these are the most significant and highest magnitude variables within the model. However, since the sample size of the data isn't huge and the sample is a very specific demographic (University of Chicago MBA students) it may be inappropriate to apply the results to the general population or other demographics which aren't similar to the sample.
+
+## Appendix
+
+### (a)
+```{r}
+### Read the data 
+library(faraway)
+head(teengamb); 
+
+## (a) Please modify the R codes in HW#4 for  Exploratory data analysis
+dim(happy)
+summary(happy)
+## histogram 
+hist(happy$happy)
+
+## plot
+library(lattice)
+splom(happy)
+## correlation matrix 
+round(cor(happy),2)
+```
+
+### (b)
+```{r}
+### (b) Jack's model
+Jackmod <- lm(happy ~ money + sex + love + work, data = happy)
+summary(Jackmod)
+plot(Jackmod)
+```
+
+### (c)
+```{r}
+### (c) Model diagnostic for Jack's model
+## 1. Check the constant variance assumption for the errors
+plot(fitted(Jackmod),sqrt(abs(residuals(Jackmod))), xlab="Fitted",
+     ylab=expression(sqrt(hat(epsilon))))
+library("lmtest")
+bptest(Jackmod)
+
+## 2.  Check the normality assumption
+qqnorm(residuals(Jackmod),ylab="Residuals",main="")
+qqline(residuals(Jackmod))
+
+hist(residuals(Jackmod),xlab="Residuals",main="")
+
+shapiro.test(residuals(Jackmod))
+dwtest(Jackmod)
+
+## 3. Check for large leverage points
+hatv <- hatvalues(Jackmod)
+head(hatv)
+n <- nrow(happy)
+p <- sum(hatv)  ## there are p=5 variables including intercept  
+as.numeric(which(hatv>2*p/n)) 
+
+## 4. Check for outliers
+# largest studentized residuals in the absolute value 
+stud <- rstudent(Jackmod)
+stud[which.max(abs(stud))]
+
+# Compute Bonferroni critical value, qt(1-alpha/(2n), n-p)
+p <- 5 # there are p=5 beta values including intercept  
+qt(1- 0.05/(n*2),n-p)
+
+# Get all outliers (if it is empty, then no outliers)
+which(abs(stud)>qt(1-0.05/(n*2),n-p))
+
+## 5. Check for influential points (if it is empty, then no influential points)
+cook <- cooks.distance(Jackmod)
+which(cook > qf(0.5, p, n-p))
+```
+
+### (d)
+```{r}
+loop = 20;
+happy.wls <- lm(happy ~ money + sex + love + work, data = happy)
+w = rep(1, dim(happy)[1]); 
+result <- NULL; 
+for (i in 1:loop){
+ sdfit  <- lm( abs(resid(happy.wls)) ~  money + sex + love + work, data = happy);
+ w  <- 1/ ( fitted(sdfit) )^2; 
+ happy.wls <- lm(happy ~ money + sex + love + work, data = happy, weights = w);
+ result <- rbind(result, coef(happy.wls));
+} 
+result
+```
+
+### (e)
+```{r}
+### (e) Kathy's model
+# it can also be derived as follows
+# Kathymod.full <- lm(happy ~ money*sex*love*work, data = happy)
+# Kathymod <- step(Kathymod.full);
+Kathymod <- lm(happy ~ money + sex + love + work + I(money*sex) + 
+                 I(money*love) + I(money*work) + I(sex*love) + I(sex*work) + I(love*work) 
+               + I(money*sex*love) + I(sex*love*work), data = happy)
+summary(Kathymod);
+plot(Kathymod) 
+```
+
+### (f)
+```{r}
+## 1. Check the constant variance assumption for the errors
+plot(fitted(Kathymod),sqrt(abs(residuals(Kathymod))), xlab="Fitted",
+     ylab=expression(sqrt(hat(epsilon))))
+library("lmtest")
+bptest(Kathymod)
+
+## 2.  Check the normality assumption
+qqnorm(residuals(Kathymod),ylab="Residuals",main="")
+qqline(residuals(Kathymod))
+
+hist(residuals(Kathymod),xlab="Residuals",main="")
+
+shapiro.test(residuals(Kathymod))
+dwtest(Kathymod)
+
+## 3. Check for large leverage points
+hatv <- hatvalues(Kathymod)
+head(hatv)
+n <- nrow(happy)
+p <- sum(hatv)  ## there are p=5 variables including intercept  
+as.numeric(which(hatv>2*p/n)) 
+
+## 4. Check for outliers
+# largest studentized residuals in the absolute value 
+stud <- rstudent(Kathymod)
+stud[which.max(abs(stud))]
+
+# Compute Bonferroni critical value, qt(1-alpha/(2n), n-p)
+p <- 5 # there are p=5 beta values including intercept  
+qt(1- 0.05/(n*2),n-p)
+
+# Get all outliers (if it is empty, then no outliers)
+which(abs(stud)>qt(1-0.05/(n*2),n-p))
+
+## 5. Check for influential points (if it is empty, then no influential points)
+cook <- cooks.distance(Kathymod)
+which(cook > qf(0.5, p, n-p))
+```
+
+### (g)
+```{r}
+## (g) Comparison of these two models
+##  (i) run ANOVA F-test 
+anova(Jackmod, Kathymod) 
+
+##  (ii) please modify the cross-validation training/testing error codes in HW#4
+##   to compare these two models, Jackmod and Kathymod, on your own 
+set.seed(2353);
+B = 100;
+TrainErr = NULL;  ## record all training errors 
+TestErr  = NULL;  ##record all testing errors 
+n <- nrow(happy)
+n1 <- round(0.8 * n)
+for (b in 1:B){
+  ## with each loop, create training and testing subsets
+  flagtmp = sort(sample(1:n, n1));
+  happy_train_tmp = happy[flagtmp, ];   ###"temporal" training subset
+  happy_test_tmp = happy[-flagtmp, ];  ###"temporal" testing subset
+  
+  ###### Fit these two (2) models to the "temporal" training subset
+  Jackmod_tmp <- lm(happy ~ money + sex + love + work, data = happy_train_tmp)
+  Kathymod_tmp <- lm(happy ~ money + sex + love + work + I(money * sex) + I(money * love) + I(money * work) + I(sex * love) +
+                       I(sex * work) + I(love * work) + I(money * sex * love) + I(sex * love * work), data = happy_train_tmp)
+  
+  ## Save training errors of these two models for the "temporal" training subset
+  TrainErr <- rbind(TrainErr, c(mean(Jackmod_tmp$residuals^2), mean(Kathymod_tmp$residuals^2)));
+  
+  ###### Prediction of these two (2) models to the "temporal" testing subset
+  Pred_jack <- predict(Jackmod_tmp, newdata= happy_test_tmp[,2:5] ); 
+  Pred_kathy <- predict(Kathymod_tmp, newdata= happy_test_tmp[,2:5] ); 
+  TestErr <- rbind(TestErr, c(mean(Pred_jack - happy_test_tmp[,1])^2, mean(Pred_kathy - happy_test_tmp[,1])^2 ));
+}
+
+### Training Error Comaprison of two models 
+colnames(TrainErr) <- c("Jackmod", "Kathymod")
+dim(TrainErr);
+round(apply(TrainErr, 2, mean),4);
+round(apply(TrainErr, 2, var),4);
+
+### Testing  Error Comparisons of two models 
+colnames(TestErr) <- c("Jackmod", "Kathymod")
+dim(TestErr);
+round(apply(TestErr, 2, mean),4);
+round(apply(TestErr, 2, var),4);
+
+## Statistical difference testing to compare two models 
+##  We can adopt the paired two-sample test 
+##   since the same training/test subsets are used for fitting two models 
+## (a) First, use two-sample t-test for training and testing errors
+t.test(TrainErr[,1],TrainErr[,2],paired=T)
+t.test(TestErr[,1],TestErr[,2],paired=T)
+## which model has smaller training error? which has smaller testing error?
+## Hints: you can check the values 
+round(apply(TrainErr, 2, mean),4);
+round(apply(TestErr, 2, mean),4);
+
+## (b) Second, use nonparametric Wilcox test for training and testing errors
+wilcox.test(TrainErr[,1],TrainErr[,2],paired=T)
+wilcox.test(TestErr[,1],TestErr[,2],paired=T)
+```
