@@ -1,0 +1,101 @@
+---
+title: "HW6"
+author: "Andrew Shao"
+date: "2024-11-06"
+output: pdf_document
+header-includes: 
+  - \usepackage{tikz}
+  - \usepackage{fvextra}
+  - \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### (a)
+
+### (b)
+
+### (c)
+
+### (d)
+
+### (e)
+
+### (f)
+
+### (g)
+
+## Appendix
+
+### (a)
+```{r}
+library(faraway)
+head(fat)
+
+## (a)(1) simple linear regression
+lma <- lm(brozek ~ chest, data=fat);
+summary(lma)
+## Extract those information for the slope 
+summary(lma)$coefficients[2,] 
+##  or the t-statistics and p-value for the slope
+##  t-stat=1.562426e+01= 15.62426, p-value= 7.372549e-39 
+summary(lma)$coefficients[2,3:4] 
+
+## (a)(2) Pearson's correlation 
+# (i) Pearson's correlation
+r1 = cor(fat$brozek, fat$chest); 
+r1
+# (ii) hypothesis testing via Pearson's correlation 
+n= dim(fat)[1];
+t.obs1 = r1* sqrt((n-2)/ (1-r1^2) ); 
+t.obs1  ### compare with (i)
+# p-value
+pvalue1 = 2*(1-pt( abs(t.obs1), df= n-2 ));
+pvalue1
+# (iii) 95% CI on Pearson's correlation
+alpha = 0.05;
+cutoffvalue = qnorm(1- alpha/2);
+Zr1 = 0.5*log((1+r1)/(1-r1));
+ZCI = Zr1 + c(-1, 1)* cutoffvalue /sqrt(n-3); 
+rho1.CI = (exp(2*ZCI) -1) / (exp(2*ZCI) +1);
+rho1.CI
+
+### (a)(3) Spearman's Correlation 
+## (i) point estimate 
+rs1= cor(fat$brozek, fat$chest, method= "spearman");
+rs1
+
+## (ii) hypothesis testing 
+n= dim(fat)[1];
+t.obs2 = rs1* sqrt((n-2)/ (1-rs1^2) ); 
+t.obs2   
+# p-value based on Spearman's correlation
+pvalue2 = 2*(1-pt( abs(t.obs2), df= n-2 ));
+pvalue2
+```
+
+### (b)
+```{r}
+```
+
+### (c)
+```{r}
+```
+
+### (d)
+```{r}
+```
+
+### (e)
+```{r}
+```
+
+### (f)
+```{r}
+```
+
+### (g)
+```{r}
+```
