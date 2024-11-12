@@ -14,6 +14,16 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ### (a)
+#### 1.
+The model is: \[ brozek = -46.216 + 0.646 \cdot chest \]
+Since the p-value is extremely small ($7.373 \cdot 10^{-39}$), we conclude that these two variables are associated. 
+
+#### 2.
+Pearson's correlation coefficient is 0.703 between the two variables. \
+The calculated p-value for $T_{obs}$ is extremely small and close to 0, so we conclude that the two variables are significantly correlated at the $\alpha = 0.05$ level. The value is the same as the value for the slope. \
+The 95% confidence interval is [0.6344, 0.7604]
+
+#### 3.
 
 ### (b)
 
