@@ -24,18 +24,87 @@ The calculated p-value for $T_{obs}$ is extremely small and close to 0, so we co
 The 95% confidence interval is [0.6344, 0.7604]
 
 #### 3.
+Spearman's correlation coefficient = 0.6731 \
+Since the p-value is extremely close to 0, we can conlude that the two variables are significantly correlated at the $\alpha = 0.05$ level.
+
+#### 4.
+The two variables are correlated and the association between the two variables is positive and strong.
 
 ### (b)
+The model is: \[ brozek = -40.599 + 1.567 \cdot neck \]
+Since the p-value is extremely small ($9.904 \cdot 10^{-17}$), we conclude that these two variables are associated. 
+
+Pearson's correlation coefficient is 0.491 between the two variables. \
+The calculated p-value for $T_{obs}$ is extremely small and close to 0, so we conclude that the two variables are significantly correlated at the $\alpha = 0.05$ level. The value is the same as the value for the slope. \
+The 95% confidence interval is [0.3917, 0.5798]
+
+Spearman's correlation coefficient = 0.491 \
+Since the p-value is extremely close to 0, we can conlude that the two variables are significantly correlated at the $\alpha = 0.05$ level.
+
+The two variables are correlated and the association between the two variables is positive and weaker than between `brozek` and `chest`.
 
 ### (c)
+I think `chest` has a stronger association because it is highly significant and the R-squared value is larger and both the pearson and spearman correlation coefficients are much larger than those for `neck`.
 
 ### (d)
+#### 1.
+The model has 13 predictors: `age`, `weight`, `height`, `neck`, `chest`, `abdom`, `hip`, `thigh`, `knee`, `ankle`, `biceps`, `forearm`, and `wrist`.
+The four significant predictors at the $\alpha = 0.05$ level are `neck`, `abdom`, `forearm`, and `wrist`.
+The multiple R-squared value is 0.749 and the adjusted R-squared value is 0.7353.
+The F-statistic is 54.63 on 13 and 238 degrees of freedom with a p-value less than $2.2\cdot 10^{-16}$.
+
+#### 2.
+The Breusch-Pagan p-value is 0.1107, meaning that there is not enough evidence to reject the null hypothesis at the $\alpha = 0.05$ level suggesting that the constant variance assumption holds. \
+The Q-Q plot residuals seem to generally follow the line which suggests that the residuals are indeed normally distributed. The Shapiro-Wilk normality test p-value is 0.2801 meaning there is not enough evidence to reject the null hypothesis at the $\alpha = 0.05$ level suggesting that the residual normality assumption holds.
+
+#### 3.
+In this specific model, `neck` is significantly associated with `brozek` while `chest` is not, which differs from my answer in (c) that `chest` had the stronger association. This could be due to collinearity between the predictors including `neck` and `chest`.
 
 ### (e)
+#### 1.
+Many of the correlation coefficients are very close to 1 or -1 which suggests collinearity between predictors, which affects the significance of individual predictors within the model.
+
+#### 2.
+Most of the condition numbers are greater than 30 which suggests a high level of collinearity in the model which could cause imprecision in the estimation of $\beta$.
+
+#### 3.
+The VIF values that are greater than 10 are `weight`, `abdom`, `hip`, and `chest` which confirms the theory that collinearity is present among the variables.
 
 ### (f)
+#### 1.
+Minimum: 0 \
+Q1: 12.8 \
+Median: 19 \
+Mean: 18.94 \
+Q3: 24.6 \
+Maximum: 45.1 \
+Standard deviation: 7.75
+
+#### 2.
+The data looks mostly normal, but the Q-Q plot deviates from the normal line at the tails which could indicate non-normality.
+
+#### 3.
+The Shapiro-Wilk p-value is 0.2747 meaning there is not enough evidence to reject the null hypothesis at the $\alpha = 0.05$ level suggesting that `brozek` is normal.
+
+#### 4.
+An error occurs because the some values for the response variable aren't positive (in this case, values of 0).
+
+#### 5.
+The plot shows that a lambda value close to 1 is within the 95% confidence interval, suggesting transformation might not be necessary since it is close to 1.
+
+#### 6.
+I would not recommend transformation since the Q-Q plot and Box-Cox plot do not suggest a need to transform; the best fit lambda is close to 1 and the data seems to be normal.
 
 ### (g)
+#### 1.
+Of the fourteen predictors in the model, `age`, `abdom`, `abdom` squared, and `wrist` are significant. The R-squared value is 0.7573 and the F-statistic p-value is extremely small.
+
+#### 2.
+Of the fifteen predictors in the model, only `age` and `wrist` are significant. The R-squared value is 0.758 and the F-statistic p-value is extremely small.
+
+#### 3.
+I think adding the quadratic term was beneficial since it increased both R-squared and adjusted R-squared values slightly with the added term being statistically significant at the $\alpha = 0.05$ level.
+Adding the cubic term didn't change the R-squared values much and instead made both all the `abdom` terms insignificant. It seems the quadratic term captured some non-linearity within the data while adding the cubic term seem to add excess complexity to the model which could cause it to overfit.
 
 ## Appendix
 
@@ -88,24 +157,166 @@ pvalue2
 
 ### (b)
 ```{r}
-```
+# (b)(1) Simple Linear Regression Model for `brozek` and `neck`
+lmb <- lm(brozek ~ neck, data=fat)
+summary(lmb)
 
-### (c)
-```{r}
+# Extract information for the slope of `neck`
+summary(lmb)$coefficients[2,]
+
+# t-statistics and p-value for the slope
+summary(lmb)$coefficients[2, 3:4]
+
+# (b)(2) Pearson's Correlation
+# (i) Pearson's correlation coefficient
+r2 <- cor(fat$brozek, fat$neck)
+r2
+
+# (ii) Hypothesis testing for Pearson's correlation
+n <- dim(fat)[1]
+t.obs2 <- r2 * sqrt((n - 2) / (1 - r2^2))
+t.obs2
+
+# p-value
+pvalue2 <- 2 * (1 - pt(abs(t.obs2), df = n - 2))
+pvalue2
+
+# (iii) 95% Confidence Interval for Pearson's correlation
+alpha <- 0.05
+cutoffvalue <- qnorm(1 - alpha / 2)
+Zr2 <- 0.5 * log((1 + r2) / (1 - r2))
+ZCI2 <- Zr2 + c(-1, 1) * cutoffvalue / sqrt(n - 3)
+rho2.CI <- (exp(2 * ZCI2) - 1) / (exp(2 * ZCI2) + 1)
+rho2.CI
+
+# (b)(3) Spearman's Correlation
+# (i) Spearman's correlation coefficient
+rs2 <- cor(fat$brozek, fat$neck, method = "spearman")
+rs2
+
+# (ii) Hypothesis testing for Spearman's correlation
+t.obs3 <- rs2 * sqrt((n - 2) / (1 - rs2^2))
+t.obs3
+
+# p-value for Spearman's correlation
+pvalue3 <- 2 * (1 - pt(abs(t.obs3), df = n - 2))
+pvalue3
 ```
 
 ### (d)
 ```{r}
+#######Part (d) ##########
+###  Lily's Model 
+modLily <- lm(brozek ~ age + weight+ height+ neck+ chest + abdom+ hip+
+                thigh+ knee+ ankle+ biceps+ forearm+ wrist, data=fat); 
+summary(modLily)
+
+### model diagnostic
+### (i) check equal variance assumption 
+library("lmtest")
+bptest(modLily)
+
+### If you want to go above and beyond,
+##   you can check the p-value of F-test when regressing 
+##   the absolute value of residuals on all X variables again
+## If p-value >= 5%, then it is okay to accept the equal variance assumption
+## If p-value < 5%, then we can run the weighted least square regression 
+lm.weight <- lm( abs(residuals(modLily))  ~ age + weight+ height+ neck+ chest + abdom+ hip+
+           thigh+ knee+ ankle+ biceps+ forearm+ wrist, data=fat);  
+summary(lm.weight)
+
+### (ii) Check the normality assumption
+qqnorm(residuals(modLily),ylab="Residuals",main="")
+qqline(residuals(modLily), lwd=3,col="red")
+shapiro.test(residuals(modLily))
 ```
 
 ### (e)
 ```{r}
+#######Part (e): Collinearity ##########
+### (e)(1) Pairwise correlation 
+## any pairs that have large correlation? 
+##   Say >= 0.90? >= 0.80? >= 0.70?
+
+### There are two ways to extract X matrix
+### The first one is to use "model.matrix" function in the regression model 
+##  here we assume to exclude the intercept for collinearity analysis
+Lily.X <- model.matrix(modLily)[,-1];
+round(cor(Lily.X),2)
+
+### The second one is to create the X matrix by ourselves from the raw data 
+###     based on those 13 predictor variables
+head(fat);
+Lily.X2 <- fat[,c(4:6,9:18)]
+round(cor(Lily.X2),2)
+## these two methods should yield to same answers! 
+
+
+### (e)(2) Condition Numbers  
+Lily.X <- model.matrix(modLily)[,-1]
+Lily.e <- eigen(t(Lily.X) %*% Lily.X)
+Lily.e$val
+sqrt(Lily.e$val[1]/Lily.e$val)
+
+### (e)(3) VIF values 
+###  There are two ways. The first one is to use the function "vif" in the package "faraway"
+require(faraway)
+vif(Lily.X)
+max(vif(Lily.X))
+mean(vif(Lily.X))
+
+### The second one is to compute VIF on your own 
+p = dim(Lily.X)[2]; 
+VIF1 <- NULL;
+for (i in 1:p){
+ Rsqure.tmp <- summary(lm(Lily.X[,i] ~ Lily.X[,-i]))$r.squared;
+ VIF1 <- cbind(VIF1, 1/(1-Rsqure.tmp));
+}
+VIF1 
+colnames(VIF1) <- colnames(Lily.X);
+VIF1
+## Check whether this is the same as the "vif" function
+vif(Lily.X)
 ```
 
 ### (f)
 ```{r}
+#######Part (f): Transforming the response ##########
+require(MASS)
+
+### 1. summary statistics for the response variable
+summary(fat$brozek) 
+c(mean(fat$brozek), sd(fat$brozek) ) 
+
+### 2. plots
+hist(fat$brozek)
+qqnorm(fat$brozek)
+qqline(fat$brozek, lwd=3, col="blue")
+
+### 3. Test Normality assumption 
+shapiro.test(fat$brozek)
+
+### 4. Box-Cox transformation 
+library(MASS)
+# boxcox(modLily, plotit = T); 
+
+### 5. Making responses to be positive before using boxcox 
+modLily1 <- lm( I(0.1+brozek) ~ age + weight+ height+ neck+ chest + abdom+ hip+
+                thigh+ knee+ ankle+ biceps+ forearm+ wrist, data=fat);
+boxcox(modLily1, plotit = T); 
+boxcox(modLily1, lambda= seq(0.5, 1.5, by=0.001)) 
 ```
 
 ### (g)
 ```{r}
+#######Part (g): Transforming the predictor ##########
+### 1. add quadatic function of "abdom"
+modLily2 <- lm( brozek ~ age + weight+ height+ neck+ chest + abdom+ I(abdom^2) +
+                  hip+thigh+ knee+ ankle+ biceps+ forearm+ wrist, data=fat);
+summary(modLily2)
+
+### 2. add both quadatic and cubic function of "abdom"
+modLily3 <- lm( brozek ~ age + weight+ height+ neck+ chest + abdom+ I(abdom^2) +
+                  I(abdom^3) + hip+thigh+ knee+ ankle+ biceps+ forearm+ wrist, data=fat);
+summary(modLily3)
 ```

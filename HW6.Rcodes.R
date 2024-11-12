@@ -69,7 +69,7 @@ bptest(modLily)
 ## If p-value >= 5%, then it is okay to accept the equal variance assumption
 ## If p-value < 5%, then we can run the weighted least square regression 
 lm.weight <- lm( abs(residuals(modLily))  ~ age + weight+ height+ neck+ chest + abdom+ hip+
-           thigh+ knee+ ankle+ biceps+ forearm+ wrist, data=fat);  
+                   thigh+ knee+ ankle+ biceps+ forearm+ wrist, data=fat);  
 summary(lm.weight)
 
 ### (ii) Check the normality assumption
@@ -113,8 +113,8 @@ mean(vif(Lily.X))
 p = dim(Lily.X)[2]; 
 VIF1 <- NULL;
 for (i in 1:p){
- Rsqure.tmp <- summary(lm(Lily.X[,i] ~ Lily.X[,-i]))$r.squared;
- VIF1 <- cbind(VIF1, 1/(1-Rsqure.tmp));
+  Rsqure.tmp <- summary(lm(Lily.X[,i] ~ Lily.X[,-i]))$r.squared;
+  VIF1 <- cbind(VIF1, 1/(1-Rsqure.tmp));
 }
 VIF1 
 colnames(VIF1) <- colnames(Lily.X);
@@ -143,7 +143,7 @@ boxcox(modLily, plotit = T);
 
 ### 5. Making responses to be positive before using boxcox 
 modLily1 <- lm( I(0.1+brozek) ~ age + weight+ height+ neck+ chest + abdom+ hip+
-                thigh+ knee+ ankle+ biceps+ forearm+ wrist, data=fat);
+                  thigh+ knee+ ankle+ biceps+ forearm+ wrist, data=fat);
 boxcox(modLily1, plotit = T); 
 boxcox(modLily1, lambda= seq(0.5, 1.5, ,by=0.001)); 
 
@@ -155,5 +155,5 @@ summary(modLily2)
 
 ### 2. add both quadatic and cubic function of "abdom"
 modLily3 <- lm( brozek ~ age + weight+ height+ neck+ chest + abdom+ I(abdom^2) +
-        I(abdom^3) + hip+thigh+ knee+ ankle+ biceps+ forearm+ wrist, data=fat);
+                  I(abdom^3) + hip+thigh+ knee+ ankle+ biceps+ forearm+ wrist, data=fat);
 summary(modLily3)
