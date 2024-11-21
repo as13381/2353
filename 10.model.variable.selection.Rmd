@@ -1,0 +1,331 @@
+---
+title: "Lecture 10"
+author: " "
+date: "November 11, 2024"
+output:
+  slidy_presentation: default
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Model Selection
+
+- We have learned the simplest cases with possible regression models
+- We expand the choice of possible models by adding new variables derived from original variables by making transformations, creating interactions or adding polynomial terms
+- Now, we consider the problem of selecting the "best" subset of predictors
+
+## The simpler, the better
+
+
+- George Box (1976) "All models are wrong, but some are useful."
+
+- Occam’s Razor is a  foundational principle that suggests the simplest solution is often the best. 
+
+- In traditional statistics and machine learning, if two models fit the training data similarly, the simpler model would often have a better performance when  predicting the testing data. 
+
+- Other advantages of simpler model includes Reliability, Interpretability, Computational simplicity, etc. 
+
+- Traditional Statistics and Machine learning: both under-fitting and overfitting yields to poor prediction performance. 
+
+- Remark on  *double descent* from Modern statistics and Machine Learning: a statistical model with a small number of parameters and a model with an extremely large number of parameters have a small testing error, but a model whose number of parameters is about the same as the number of data points used to train the model will have a large testing error. 
+
+
+
+## In the Regression Context
+
+- Unnecessary predictors will add noise to the estimation of other quantities that interested us. Degrees of freedom will be wasted.
+- Collecting data on additional variables can cost time or money.
+- We must focus our efforts on the main objective of regression modeling.
+- We might obtain better predictions by using larger models. So although smaller models might be appealing, we also do not wish to compromise on predictive ability.
+
+
+## Approaches
+1. Hypothesis testing methods 
+2. Criterion-based methods
+
+
+<!-- ## Hierarchical Models -->
+
+<!-- - Some models have a natural hierarchy. For example, $x^2$ is a higher order term than $x$ -->
+<!-- - Lower order terms should not usually be removed from the model before higher order terms in the same variable.  -->
+
+<!-- ## Hierarchical Models - Model 1 -->
+
+<!-- - Consider the polynomial model: $$y = \beta_0 + \beta_1x+\beta_2x^2+\epsilon$$ -->
+<!-- - Suppose the regression summary shows $x$ is not significant but $x^2$ is, if we remove $x$ term, the reduced model would be: $$y = \beta_0 + \beta_2x^2+\epsilon$$ -->
+<!-- - Suppose we make a scale change $x->x+a$, then the model becomes: $$y=\beta_0+\beta_2a^2+(2\beta_2a)x+(\beta_2)x^2+\epsilon$$ -->
+<!-- - The first order $x$ has reappeared, which is not desirable. -->
+
+<!-- ## Hierarchical Models - Model 2 -->
+
+<!-- - Consider the models with interactions, example of a second-order response surface model: -->
+<!-- $$y=\beta_0+\beta_1x_1+\beta_2x_2+\beta_{11}x_1^2+\beta_{22}x_2^2+\beta_{12}x_1x_2+\epsilon$$ -->
+<!-- - We would not normally consider removing the $x1x2$ interaction term without simultaneously considering the removal of the $x_1^2$ and $x_2^2$ terms. -->
+<!-- - A joint removal would correspond to the clearly meaningful comparison of a quadratic surface and a linear -->
+<!-- one -->
+<!-- - Just removing the $x1x2$ term would correspond to a surface that is aligned with the coordinate axes -->
+<!-- - This is harder to interpret and should not be considered unless some particular meaning can be attached. -->
+
+
+## Testing-Based Procedure: Backward Elimination
+
+1. It can be run manually while taking account of what variables are eligible for removal
+2. We start with all the predictors in the model and then remove the predictor with *highest* p-value greater than $\alpha_{crit}$
+3. Then refit the model and remove the remaining *least significant* predictor provided its p-value is greater than $\alpha_{crit}$
+4. The $\alpha_{crit}$ also called the "p-to-remove" and does not have to be 5%. If focus on prediction performance, 15 to 20% cutoff may work best. 
+
+## Other Testing-Based Procedures
+
+
+- Forward Selection: reverse of the backward method. Start with no variables, then for all predictors not yet in the model, we check their p-values, and choose the one with the lowest p-value that is less than $\alpha_{crit}$. 
+
+- Stepwise Regression: a combination of backward elimination and forward selection.
+1. a situation where variables are added or removed early in the process and we want to change our mind about them later
+2. At each stage a variable may be added or removed and there are several variations on exactly how this is
+done
+
+
+## Examples in R
+- A backward elimination on data on the 50 states from the 1970s. We take life expectancy as the response and the remaining variables as predictors:
+
+```{r}
+data(state)
+statedata <- data.frame(state.x77,row.names=state.abb)
+lmod <- lm(Life.Exp ~ ., statedata)
+summary(lmod)
+```
+
+- Some variables are not significant such as Income and Area.
+
+## Examples in R
+
+1. Remove Area
+
+```{r}
+lmod <- update(lmod, . ~ . - Area)
+summary(lmod)
+```
+
+## Examples in R
+
+2. Remove Illiteracy
+
+```{R}
+lmod <- update(lmod, . ~ . - Illiteracy)
+summary(lmod)
+```
+
+## Examples in R
+
+3. Remove Income
+
+```{r}
+lmod <- update(lmod, . ~ . - Income)
+summary(lmod)
+```
+
+## Examples in R
+
+4. Remove Population
+
+```{r}
+lmod <- update(lmod, . ~ . - Population)
+summary(lmod)
+```
+
+- This is a close call!
+- Notice that the $R^2$ for the full model of 0.736 is reduced only slightly to 0.713 in the final model, so the removal of four predictors causes only a minor reduction in fit. 
+
+<!-- ## More consideration -->
+<!-- - The variables omitted from the model may still be related to the response -->
+<!-- ```{r} -->
+<!-- summary(lm(Life.Exp ~ Illiteracy+Murder+Frost, statedata)) -->
+<!-- ``` -->
+
+<!-- - Illiteracy does have some association with life expectancy -->
+<!-- - It is true that replacing illiteracy with high school graduation rate gives us a somewhat better fitting model, but it would be insufficient to conclude that illiteracy is not a variable of interest. -->
+
+
+## Drawbacks for testing-based procedures
+
+- Because of the "one-at-a-time" nature of adding/dropping variables, it is possible to miss the “optimal” model.
+
+- The p-values used should not be treated too literally. The removal of less significant predictors tends to increase the significance of the remaining predictors, so we may overstate the importance of the remaining predictors.
+
+- Stepwise variable selection tends to pick models that are smaller than desirable for prediction purposes.
+
+
+<!-- 3. The procedures are not directly linked to final objectives of prediction or explanation and so may not really help solve the problem of interest. Model selection cannot be divorced from the underlying purpose of the investigation. Variable selection tends to amplify the statistical significance of the variables that stay in the model.  -->
+
+
+
+<!-- - We pick a model $g$, parameterized by $\theta$, that is close to the true model $f$. -->
+<!-- - The distance between $g$ and $f$: $$I(f,g) = \int f(x)log(\frac{f(x)}{g(x|\theta)})dx$$ -->
+
+<!-- - This is known as the Kullback-Leibler information (or distance) -->
+<!-- - Unfortunately. it is impractical for direct implementation because we do not know f. -->
+<!-- - We substitute in the MLE of $\theta$, the equation becomes:  -->
+<!-- $$\hat{I}(f,g)=\int f(x)logf(x)dx - \int f(x)log \text{ } g(x|\hat{\theta})dx$$ -->
+
+## Criterion-Based Procedures - AIC
+
+- The AIC criterion: (Akaike information criterion) (Akaike, 1973, 26353 Google Citations)
+$$AIC = -2L(\hat{\theta}) + 2\times p$$
+
+- Here, the log-likelihood $-2L(\hat{\theta}) = n \log(RSS/n) + Constant$.
+
+- We choose the model that minimized the AIC
+
+- AIC naturally provides a balance between goodness-of-fit and model complexity
+
+## Criterion-Based Procedures - BIC
+
+- BIC: Bayesian information criterion is another criteria, (Schwarz, 1978, 45925 Google Citations) is
+- $$BIC = -2L(\hat{\theta}) + \log(n)\times p$$
+- BIC penalizes larger models more heavily and so will tend to prefer smaller models in comparison to AIC.
+
+## Criterion-Based Procedures - Adjusted $R^2$
+
+- Another commonly used criterion is adjusted $R^2$, written $R_a^2$
+- Recall $R^2=1-\frac{RSS}{TSS}$, adding a variable *always* decreases RSS, thus increases $R^2$
+- We use adjusted $R^2$: $$R_a^2 = 1-\frac{RSS/(n-p)}{TSS/(n-1)} = 1-(\frac{n-1}{n-p})(1-R^2) $$
+
+<!-- = 1 -->
+<!-- -\frac{\hat{\sigma}_{model}^2}{\hat{\sigma}_{null}^2}$$ -->
+
+- Adding a predictor will only increase $R_a^2$ if it has some predictive value.
+
+## Examples in R
+
+- The leaps package exhaustively searches all possible combinations of the predictors. For each size of
+model $p$ (the number of coefficients), it finds the variables that produce the minimum RSS.
+```{r}
+require(leaps)
+b <- regsubsets(Life.Exp~.,data=statedata)
+rs <- summary(b)
+rs$which
+
+```
+
+## AIC
+
+Recall $p$ is the number of coefficients, or the number of predictors + 1. 
+```{r}
+AIC <- 50*log(rs$rss/50) + (2:8)*2
+plot(AIC ~ I(1:7), ylab="AIC", xlab="Number of Predictors")
+```
+
+- The AIC is minimized by the model with four predictors, namely population, murder, high school graduation and frost.
+
+## BIC
+
+```{r}
+BIC <- 50*log(rs$rss/50) + (2:8)*log(50)
+plot(BIC ~ I(1:7), ylab="BIC", xlab="Number of Predictors")
+```
+
+- The BIC is minimized again by a model of four predictors, namely population, murder, high school graduation and frost.
+
+
+
+
+## Examples in R
+
+```{r}
+plot(1:7,rs$adjr2,xlab="Number of Predictors",ylab="Adjusted R-square")
+which.max(rs$adjr2)
+```
+- The population, frost, high school graduation and murder model has the largest $R_a^2$
+
+
+<!-- ## Mallow's $C_p$ statistic -->
+
+<!-- - A good model should predict well, so the average mean square error of prediction might be a good criterion: $$\frac{1}{\sigma^2}\sum_iE(\hat{y_i}-Ey_i)^2$$ -->
+
+<!-- - $C_p$ statistic: $$C_p = \frac{RSS_P}{\hat{\sigma}^2}+2p-n$$ -->
+
+<!-- - $\hat{\sigma}^2$ is from the model with all predictors -->
+<!-- - $RSS_p$ indicates the RSS from a model with $p$ parameters. -->
+<!-- - A model with a bad fit will have $C_p$ much bigger than p. -->
+
+
+<!-- ## Examples in R -->
+
+<!-- ```{r} -->
+<!-- plot(2:8,rs$cp,xlab="No. of Parameters",ylab="Cp Statistic") -->
+<!-- abline(0,1) -->
+<!-- ``` -->
+
+<!-- - Both models are on or below the $C_p = p$ line, indicating good fits. -->
+
+
+## step() function
+
+- If there are $q$ potential predictors, then there are $2^q$ possible models.
+- Time consuming for larger $q$.
+- step() function is a faster alternative.
+
+
+```{R}
+lmod <- lm(Life.Exp ~ ., data=statedata)
+step(lmod)
+```
+- same result as the backward elimination and AIC
+
+<!-- ## Outliers and influential points -->
+
+<!-- - Variable selection methods are sensitive to outliers and influential points -->
+
+<!-- ```{r} -->
+<!-- h <- lm.influence(lmod)$hat -->
+<!-- names(h) <- state.abb -->
+<!-- rev(sort(h)) -->
+<!-- ``` -->
+
+<!-- - Alaska has high leverage -->
+
+
+<!-- ```{r} -->
+<!-- #Exclude Alaska -->
+<!-- b<-regsubsets(Life.Exp~.,data=statedata, subset=(state.abb!="AK")) -->
+<!-- rs <- summary(b) -->
+<!-- rs$which[which.max(rs$adjr),] -->
+<!-- ``` -->
+<!-- ## Outliers and influential points - continue -->
+
+<!-- ```{r} -->
+<!-- stripchart(data.frame(scale(statedata)), method ="jitter", las=2, vertical=TRUE) -->
+<!-- ``` -->
+
+<!-- - we see that population and area are skewed — we try transforming them -->
+
+<!-- ```{R} -->
+<!-- b<-regsubsets(Life.Exp ~ log(Population)+Income+Illiteracy+ Murder+ HS.Grad+Frost+log(Area),statedata) -->
+<!-- rs <- summary(b) -->
+<!-- rs$which[which.max(rs$adjr),] -->
+<!-- ``` -->
+<!-- - This changes the "best" model again to log(population), frost, high school graduation and murder. -->
+
+
+## Summary
+
+
+- Variable selection is a means to an end and not an end itself. 
+- The aim is to construct a model that predicts well or explains the relationships in the data. 
+- Automatic variable selections are not guaranteed to be consistent with these goals. 
+
+- Hypothesis testing-based methods use a restricted search through the space of potential models and use a dubious method for choosing between models when repeated many times.
+- Criterion-based methods typically involve a wider search and compare models in a preferable manner
+- We recommend criterion-based methods.
+
+<!-- ## Summary (II) -->
+
+<!-- Things to consider when choosing models: -->
+
+<!-- 1. Do the models have similar qualitative consequences? -->
+<!-- 2. Do they make similar predictions? -->
+<!-- 3. What is the cost of measuring the predictors? -->
+<!-- 4. Which has the best diagnostics? -->
+
+

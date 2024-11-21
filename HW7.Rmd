@@ -1,0 +1,288 @@
+---
+title: "HW7"
+author: "Andrew Shao"
+date: "2024-11-19"
+output: pdf_document
+header-includes: 
+  - \usepackage{tikz}
+  - \usepackage{fvextra}
+  - \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1.1
+```{r}
+# Load the data
+data(prostate,package = "faraway")
+# Enter your code for fitting the model below
+lmod <- lm(lpsa ~ ., prostate)
+summary(lmod)
+
+# Step 1
+lmod1 <- update(lmod, . ~ . - gleason)
+# summary(lmod1)
+
+# Step 2
+lmod2 <- update(lmod1, . ~ . - lcp)
+# summary(lmod2)
+
+# Step 3
+lmod3 <- update(lmod2, . ~ . - pgg45)
+# summary(lmod3)
+
+# Step 4
+lmod4 <- update(lmod3, . ~ . - age)
+# summary(lmod4)
+
+# Step 5
+lmod5 <- update(lmod4, . ~ . - lbph)
+
+# Step 6
+summary(lmod5)
+```
+
+## 1.2
+```{r}
+require(leaps)
+
+prostate.leaps <- regsubsets(lpsa ~ ., data= prostate)
+# summary(prostate.leaps)
+
+rs <- summary(prostate.leaps)
+# rs$which
+
+n <- nrow(prostate)
+AIC <- n*log(rs$rss/n) + (2:9)*2
+best_index <- which.min(AIC)
+plot(AIC ~ I(1:8), ylab="AIC", xlab="Number of Predictors")
+points(best_index, AIC[best_index], col = "red", pch = 19)
+
+prostate.models <- summary(prostate.leaps)$which;
+prostate.models.size <- as.numeric(attr(prostate.models, "dimnames")[[1]]);
+prostate.models.rss <- summary(prostate.leaps)$rss;
+
+op <- which(prostate.models.size == best_index) 
+flag <- op[which.min(prostate.models.rss[op])] 
+
+paste('The predictors I selected are:', paste(names(prostate.models[flag,])[prostate.models[flag,]][-1], collapse = ', '))
+```
+```{r}
+best_model <- lm(lpsa ~ lcavol + lweight + age + lbph + svi, data = prostate)
+summary(best_model)
+```
+## 1.3
+```{r}
+require(leaps)
+
+prostate.leaps <- regsubsets(lpsa ~ ., data= prostate)
+# summary(prostate.leaps)
+
+rs <- summary(prostate.leaps)
+# rs$which
+
+n <- nrow(prostate)
+BIC <- n*log(rs$rss/n) + (2:9)*log(n)
+best_index <- which.min(BIC)
+plot(BIC ~ I(1:8), ylab="BIC", xlab="Number of Predictors")
+points(best_index, BIC[best_index], col = "red", pch = 19)
+
+prostate.models <- summary(prostate.leaps)$which;
+prostate.models.size <- as.numeric(attr(prostate.models, "dimnames")[[1]]);
+prostate.models.rss <- summary(prostate.leaps)$rss;
+
+op <- which(prostate.models.size == best_index) 
+flag <- op[which.min(prostate.models.rss[op])] 
+
+paste('The predictors I selected are:', paste(names(prostate.models[flag,])[prostate.models[flag,]][-1], collapse = ', '))
+```
+```{r}
+best_model <- lm(lpsa ~ lcavol + lweight + svi, data = prostate)
+summary(best_model)
+```
+
+## 1.4
+```{r}
+require(leaps)
+
+prostate.leaps <- regsubsets(lpsa ~ ., data= prostate)
+# summary(prostate.leaps)
+
+rs <- summary(prostate.leaps)
+# rs$which
+
+# n <- nrow(prostate)
+best_index <- which.max(rs$adjr2)
+plot(rs$adjr2 ~ I(1:8), ylab="BIC", xlab="Number of Predictors")
+points(best_index, rs$adjr2[best_index], col = "red", pch = 19)
+
+prostate.models <- summary(prostate.leaps)$which;
+prostate.models.size <- as.numeric(attr(prostate.models, "dimnames")[[1]]);
+prostate.models.rss <- summary(prostate.leaps)$rss;
+
+op <- which(prostate.models.size == best_index) 
+flag <- op[which.min(prostate.models.rss[op])] 
+
+paste('The predictors I selected are:', paste(names(prostate.models[flag,])[prostate.models[flag,]][-1], collapse = ', '))
+```
+```{r}
+best_model <- lm(lpsa ~ lcavol + lweight + age + lbph + svi + lcp + pgg45, data = prostate)
+summary(best_model)
+```
+
+## 2.1
+```{r}
+rm (list = ls())
+animalsDf <- read.csv("AnimalsStat.csv")
+head(animalsDf)
+```
+
+## 2.2
+Body summary statistics
+```{r}
+summary(animalsDf$Body)
+```
+Brain summary statistics
+```{r} 
+summary(animalsDf$Brain)
+```
+
+## 2.3
+Which animal has the smallest body mass in the sample?
+```{r}
+animalsDf[animalsDf$Body == min(animalsDf$Body),]
+```
+Which animal has the largest body mass in the sample?
+```{r}
+animalsDf[animalsDf$Body == max(animalsDf$Body),]
+```
+Which animal has the smallest brain mass in the sample?
+```{r}
+animalsDf[animalsDf$Brain == min(animalsDf$Brain),]
+```
+Which animal has the largest brain mass in the sample?
+```{r}
+animalsDf[animalsDf$Brain == max(animalsDf$Brain),]
+```
+
+## 2.4
+```{r}
+animalsDf$brain_to_body_ratio <- animalsDf$Brain / animalsDf$Body
+animalsDf[which.max(animalsDf$brain_to_body_ratio), ]
+```
+## 2.5
+```{r}
+plot(animalsDf$Body, animalsDf$Brain,
+     xlab = "Body Mass (kg)", ylab = "Brain Mass (g)",
+     main = "Body Mass vs Brain Mass",
+     pch = 16, col = "blue")
+abline(lm(Brain ~ Body, data = animalsDf), col = "red", lwd = 2)
+
+plot(log(animalsDf$Body), animalsDf$Brain,
+     xlab = "Log Body Mass", ylab = "Brain Mass (g)",
+     main = "Log Body Mass vs Brain Mass",
+     pch = 16, col = "blue")
+abline(lm(Brain ~ log(Body), data = animalsDf), col = "red", lwd = 2)
+
+plot(animalsDf$Body, log(animalsDf$Brain),
+     xlab = "Body Mass (kg)", ylab = "Log Brain Mass",
+     main = "Body Mass vs Log Brain Mass",
+     pch = 16, col = "blue")
+abline(lm(log(Brain) ~ Body, data = animalsDf), col = "red", lwd = 2)
+
+plot(log(animalsDf$Body), log(animalsDf$Brain),
+     xlab = "Log Body Mass", ylab = "Log Brain Mass",
+     main = "Log Body Mass vs Log Brain Mass",
+     pch = 16, col = "blue")
+abline(lm(log(Brain) ~ log(Body), data = animalsDf), col = "red", lwd = 2)
+```
+Log body mass and log brain mass model looks the best.
+
+## 2.6
+```{r}
+library(faraway)
+
+best_model <- lm(log(Brain) ~ log(Body), data = animalsDf)
+
+cooks_distances <- cooks.distance(best_model)
+
+halfnorm(cooks_distances, labs = rownames(animalsDf),
+         main = "Half-Normal Plot of Cook's Distances")
+
+largest_cooks <- sort(cooks_distances, decreasing = T)[1:3]
+
+animalsDf[names(largest_cooks), ]
+```
+The three largest are Brachiosaurus, Dipliodocus, and Triceratops.
+
+## 2.7
+Original model
+```{r}
+original_model <- lm(log(Brain) ~ log(Body), data = animalsDf)
+summary(original_model)
+```
+New model
+```{r}
+animalsDf_removed <- animalsDf[-1 * as.numeric(names(largest_cooks)), ]
+new_model <- lm(log(Brain) ~ log(Body), data = animalsDf_removed)
+summary(new_model)
+plot(log(animalsDf_removed$Body), log(animalsDf_removed$Brain),
+     xlab = "Log Body Mass", ylab = "Log Brain Mass",
+     main = "Log Body Mass vs Log Brain Mass",
+     pch = 16, col = "blue")
+abline(new_model, col = "red", lwd = 2)
+```
+Original R-squared: 0.6076 \
+New R-squared: 0.7258
+
+## 3.1
+```{r}
+rm (list = ls())
+require(MASS)
+data(ozone, package = "faraway")
+
+model_31 <- lm(O3 ~ temp + humidity + ibh + temp * humidity, data = ozone)
+summary(model_31)
+```
+The interaction coefficient is significant. 
+`temp` variable isn't significant.
+We shouldn't remove `temp` because removing it would affect the interpretation of the model and interaction term.
+
+## 3.2
+```{r}
+plot(model_31)
+```
+Spread of the residuals increases as fitted values increases, which indicates heteroscedascity, which is an issue as it suggests the constant variance assumption is violated. The curve in the residuals also suggests a non-linear relationship.
+
+## 3.3
+```{r}
+hist(rstandard(model_31), 
+     main = "Histogram of Standardized Residuals",
+     xlab = "Standardized Residuals")
+```
+See above in 3.2 for the Q-Q plot. The residuals in the Q-Q plot lie close to the diagonal and the histogram looks roughly normal, which suggests that the normality assumption holds.
+
+## 3.4
+```{r}
+boxcox_result <- boxcox(model_31, lambda = seq(-2, 2, by = 0.1))
+
+boxcox_result$x[which.max(boxcox_result$y)]
+```
+The exponent I found was 0.303.
+
+## 3.5
+```{r}
+lambda <- boxcox_result$x[which.max(boxcox_result$y)]
+ozone$O3_transformed <- (ozone$O3^lambda - 1) / lambda
+
+new_model <- lm(O3_transformed ~ temp * humidity + ibh, data = ozone)
+summary(new_model)
+
+plot(new_model)
+hist(rstandard(new_model), 
+     main = "Histogram of Standardized Residuals",
+     xlab = "Standardized Residuals")
+```
+The spread is now roughly evenly spread across fitted values with less curvature, suggesting heteroscedascity has been reduced. The Q-Q plot residuals are closer to the diagonal line, especially in the tails, and the histogram appears more normal suggesting better alignment with the normality assumption. Outliers may be present, however.
