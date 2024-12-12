@@ -1,0 +1,291 @@
+---
+title: "Project"
+author: "Andrew Shao"
+date: "2024-11-28"
+output: pdf_document
+header-includes: 
+  - \usepackage{tikz}
+  - \usepackage{fvextra}
+  - \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load necessary packages
+```{r, warning=FALSE}
+library(MASS)
+library(tidyverse)
+library(magrittr)
+library(patchwork)
+library(lattice)
+library(car)
+library(glmnet)
+library(gglasso)
+library(faraway)
+library(randomForest)
+library(caret)
+```
+
+## Load data
+```{r}
+obesity_raw <- read_csv('ObesityDataSet_raw_and_data_sinthetic.csv', show_col_types = F)
+head(obesity_raw)
+```
+
+## Data pre-processing
+```{r}
+# Check for missing values
+obesity_raw %>% summarise(across(everything(), ~ sum(is.na(.))))
+obesity_raw %>% select_if(is.character) %>% lapply(unique)
+
+classify_obesity <- function(bmi) {
+  obesity = factor(case_when(bmi >= 40 ~ 6,
+                             bmi >= 35 ~ 5,
+                             bmi >= 30 ~ 4,
+                             bmi >= 25 ~ 3,
+                             bmi >= 18.5 ~ 2,
+                             .default = 1),
+                   levels = 1:6,
+                   ordered = T)
+}
+
+# Preprocess data
+df <- obesity_raw %>% mutate(bmi = Weight / (Height ** 2),
+                             obesity = classify_obesity(bmi)) %>%
+  dplyr::select(-Weight, -Height, -NObeyesdad)
+
+```
+
+## EDA: Whole Dataset
+```{r}
+# Get the names of all categorical variables
+categorical_vars <- df %>%
+  select(negate(where(is.numeric))) %>%
+  names()
+
+# Create plots for each categorical variable and the numeric obesity variable
+plots <- map(categorical_vars, ~ {
+  ggplot(df, aes_string(x = .x)) +
+    geom_bar(fill = "lightblue", color = "black") +
+    labs(
+      x = .x,
+      y = "Count"
+    ) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+})
+
+# Combine all plots into a single large layout
+combined_plot <- wrap_plots(plots, ncol = 3)
+
+# Display the combined plot
+print(combined_plot)
+
+
+# Identify numeric variables excluding 'NObeyesdad'
+numeric_vars <- df %>%
+  dplyr::select(where(is.numeric)) %>%
+  names()
+
+# Create plots for each numeric variable
+plots <- map(numeric_vars, ~ {
+  ggplot(df, aes_string(x = .x)) +
+    geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+    labs(
+      x = .x,
+      y = "Frequency"
+    ) +
+    theme_minimal()
+})
+
+# Combine all plots into a single layout
+combined_plot <- wrap_plots(plots, ncol = 3)
+
+# Display the combined plot
+print(combined_plot)
+
+round(cor(df[, numeric_vars]),2)
+```
+
+## Data preprocessing
+```{r}
+set.seed(2)
+sample <- sample(c(T, F), nrow(df), replace = T, prob = c(0.8, 0.2))
+
+train_total <- df[sample,] %>% filter(CALC != 'Always')
+test_total <- df[!sample,] %>% filter(CALC != 'Always')
+```
+
+## OLS model
+```{r}
+lr_total <- lm(bmi ~ ., data = select(train_total, -obesity))
+summary(lr_total)
+plot(lr_total)
+
+confusionMatrix(classify_obesity(predict(lr_total, train_total)), train_total$obesity)
+confusionMatrix(classify_obesity(predict(lr_total, test_total)), test_total$obesity)
+```
+
+## Ordered Logit
+```{r}
+olr_total <- polr(obesity ~ ., data = select(train_total, -bmi), Hess = T)
+summary(olr_total)
+
+p <- round(pnorm(coef(summary(olr_total))[, "t value"], lower.tail = FALSE) * 2, 6)
+psig <- case_when(p < 0.001 ~ '***',
+                  p < 0.01 ~ '**',
+                  p < 0.05 ~ '*',
+                  p < 0.1 ~ '.',
+                  .default = ' ')
+View(cbind(coef(summary(olr_total))[, "t value"], 'p-value' = p, psig))
+
+confusionMatrix(predict(olr_total, select(train_total, -bmi)), train_total$obesity)
+confusionMatrix(predict(olr_total, select(test_total, -bmi)), test_total$obesity)
+
+# calculate_accuracy_with_leeway <- function(predictions, actual, leeway = 1) {
+#   # Check if predictions are within the acceptable range
+#   within_leeway <- abs(as.numeric(predictions) - as.numeric(actual)) <= leeway
+#   
+#   # Calculate accuracy
+#   accuracy <- mean(within_leeway)
+#   
+#   return(accuracy)
+# }
+# 
+# calculate_accuracy_with_leeway(predict(olog, train), train$obesity, 1)
+# calculate_accuracy_with_leeway(predict(olog, test), test$obesity, 1)
+# calculate_accuracy_with_leeway(predict(olog, train), train$obesity, 2)
+# calculate_accuracy_with_leeway(predict(olog, test), test$obesity, 2)
+```
+
+## Random Forest
+```{r}
+RF_total <- randomForest(formula = obesity ~ ., data = select(train_total, -bmi))
+
+confusionMatrix(predict(RF_total, select(train_total, -bmi)), train_total$obesity)
+confusionMatrix(predict(RF_total, select(test_total, -bmi)), test_total$obesity)
+
+# calculate_accuracy_with_leeway(predict(RF, train), train$obesity, 1)
+# calculate_accuracy_with_leeway(predict(RF, test), test$obesity, 1)
+# calculate_accuracy_with_leeway(predict(RF, train), train$obesity, 2)
+# calculate_accuracy_with_leeway(predict(RF, test), test$obesity, 2)
+```
+
+## Exclude synthetic data
+```{r}
+df_real <- df[1:485,] 
+
+# Train-test split
+set.seed(2)
+sample <- sample(c(T, F), nrow(df_real), replace = T, prob = c(0.8, 0.2))
+
+train_real <- df_real[sample,] %>% filter(CALC != 'Always')
+test_real <- df_real[!sample,] %>% filter(CALC != 'Always')
+```
+
+## Real data EDA
+```{r}
+# Get the names of all categorical variables
+categorical_vars <- df_real %>%
+  select(negate(where(is.numeric))) %>%
+  names()
+
+# Create plots for each categorical variable and the numeric obesity variable
+plots <- map(categorical_vars, ~ {
+  ggplot(df_real, aes_string(x = .x)) +
+    geom_bar(fill = "lightblue", color = "black") +
+    labs(
+      x = .x,
+      y = "Count"
+    ) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+})
+
+# Combine all plots into a single large layout
+combined_plot <- wrap_plots(plots, ncol = 3)
+
+# Display the combined plot
+print(combined_plot)
+
+
+# Identify numeric variables excluding 'NObeyesdad'
+numeric_vars <- df_real %>%
+  dplyr::select(where(is.numeric)) %>%
+  names()
+
+# Create plots for each numeric variable
+plots <- map(numeric_vars, ~ {
+  ggplot(df_real, aes_string(x = .x)) +
+    geom_histogram(bins = 10, fill = "lightblue", color = "black") +
+    labs(
+      x = .x,
+      y = "Frequency"
+    ) +
+    theme_minimal()
+})
+
+# Combine all plots into a single layout
+combined_plot <- wrap_plots(plots, ncol = 3)
+
+# Display the combined plot
+print(combined_plot)
+
+round(cor(df_real[, numeric_vars]),2)
+```
+
+## Linear model
+```{r}
+lr_real <- lm(bmi ~ ., data = select(train_real, -obesity))
+summary(lr_real)
+plot(lr_real)
+
+confusionMatrix(classify_obesity(predict(lr_real, train_real)), train_real$obesity)
+confusionMatrix(classify_obesity(predict(lr_real, test_real)), test_real$obesity)
+```
+
+## Group LASSO
+```{r}
+# v.group <- c(1, 2, 3, 4, 5, 6, 7, 7, 7, 8, 9, 10, 11, 12, 13, 13, 14, 14, 14, 14)
+# cv.gr <- cv.gglasso(x_train, y_train, group = v.group, loss = 'ls')
+# gr_lasso <- gglasso(x_train, y_train, group = v.group, loss = 'ls', lambda = cv.gr$lambda.min)
+# coef(gr_lasso)
+# 
+# gr_pred_train <- predict(gr_lasso, x_train)
+# confusionMatrix(classify_obesity(gr_pred_train), train$obesity)
+# 
+# x_test <- test %>% dplyr::select(-bmi, -obesity)
+# x_test <- model.matrix(~ .-1, x_test)[,-1]
+# 
+# gr_pred_test <- predict(gr_lasso, x_test)
+# confusionMatrix(classify_obesity(gr_pred_test), test$obesity)
+```
+
+## Ordered Logit
+```{r}
+# Ordered logistic
+olr_real <- polr(obesity ~ ., data = select(train_real, -bmi), Hess = T)
+summary(olr_real)
+
+p <- round(pnorm(abs(coef(summary(olr_real))[, "t value"]), lower.tail = FALSE) * 2, 6)
+psig <- case_when(p < 0.001 ~ '***',
+                  p < 0.01 ~ '**',
+                  p < 0.05 ~ '*',
+                  p < 0.1 ~ '.',
+                  .default = ' ')
+View(cbind(coef(summary(olr_real))[, "t value"], 'p-value' = p, psig))
+
+confusionMatrix(predict(olr_real, select(train_real, -bmi)), train_real$obesity)
+confusionMatrix(predict(olr_real, select(test_real, -bmi)), test_real$obesity)
+```
+
+## Random Forest
+```{r}
+set.seed(2)
+RF_real <- randomForest(formula = obesity ~ ., data = select(train_real, -bmi))
+
+confusionMatrix(predict(RF_real, select(train_real, -bmi)), train_real$obesity)
+confusionMatrix(predict(RF_real, select(test_real, -bmi)), test_real$obesity)
+```

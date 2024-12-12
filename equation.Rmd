@@ -1,0 +1,13 @@
+---
+title: "Equations"
+author: "Andrew Shao"
+date: "2024-12-02"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Let $Y$ be an ordinal variable with categories $j=1,...,J$ where $P(Y\leq J) = 1$. For $k$ different predictors $X_1,...,X_k$:
+\[\log\frac{P(Y\leq j)}{P(Y > j)} = \beta_0^{(j)} + \beta_1 X_1 + ... + \beta_i X_i\]
